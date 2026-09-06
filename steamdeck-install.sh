@@ -15,7 +15,8 @@
 set -euo pipefail
 
 REPO="${MYFPS_REPO:-andyfreed/MyFPS-Releases}"
-APP_NAME="${MYFPS_APP_NAME:-MyFPS}"
+APP_NAME="${MYFPS_APP_NAME:-MyFPS}"                 # folder / executable name (internal)
+DISPLAY_NAME="${MYFPS_DISPLAY_NAME:-Reading Shootout}"  # name shown in the Steam library
 INSTALL_DIR="${MYFPS_INSTALL_DIR:-$HOME/Games/MyFPS}"
 PROTON="${MYFPS_PROTON:-proton_experimental}"
 MANIFEST_URL="https://github.com/$REPO/releases/latest/download/manifest.json"
@@ -157,7 +158,7 @@ LAUNCH_OPTIONS="\"$UPDATER\" %command%"
 echo "  Pre-launch updater installed: $UPDATER"
 
 # ---------------------------------------------------------------- 2. steam shortcut
-say "Adding $APP_NAME to your Steam library (Proton: $PROTON)"
+say "Adding $DISPLAY_NAME to your Steam library (Proton: $PROTON)"
 
 STEAM_ROOT=""
 for candidate in "$HOME/.local/share/Steam" "$HOME/.steam/steam" "$HOME/.steam/root"; do
@@ -176,7 +177,7 @@ if pgrep -x steam >/dev/null; then
     pgrep -x steam >/dev/null && warn "Steam is still running; the shortcut may not stick. Close Steam fully and re-run if it is missing."
 fi
 
-python3 - "$USER_CFG/shortcuts.vdf" "$STEAM_ROOT/config/config.vdf" "$APP_NAME" "$EXE" "$INSTALL_DIR" "$PROTON" "$LAUNCH_OPTIONS" <<'PY'
+python3 - "$USER_CFG/shortcuts.vdf" "$STEAM_ROOT/config/config.vdf" "$DISPLAY_NAME" "$EXE" "$INSTALL_DIR" "$PROTON" "$LAUNCH_OPTIONS" <<'PY'
 import os, struct, sys, zlib, shutil, re, time
 
 shortcuts_path, config_path, app_name, exe, start_dir, proton, launch_options = sys.argv[1:8]
@@ -240,7 +241,7 @@ appid_signed = struct.unpack("<i", struct.pack("<I", appid_unsigned))[0]
 
 existing = None
 for idx, sc in shortcuts.items():
-    if isinstance(sc, dict) and (sc.get("AppName") == app_name or sc.get("appname") == app_name):
+    if isinstance(sc, dict) and (sc.get("AppName") in (app_name, "MyFPS") or sc.get("appname") in (app_name, "MyFPS")):
         existing = idx
         break
 
@@ -311,7 +312,7 @@ fi
 
 cat <<EOF
 
-Done. $APP_NAME $VERSION is installed in $INSTALL_DIR and is in your Steam library.
-Switch back to Gaming Mode and launch it from the Non-Steam tab (or search for $APP_NAME).
+Done. $DISPLAY_NAME $VERSION is installed in $INSTALL_DIR and is in your Steam library.
+Switch back to Gaming Mode and launch it from the Non-Steam tab (or search for $DISPLAY_NAME).
 Abilities are on the shoulder buttons; the game updates itself on launch.
 EOF

@@ -1,10 +1,10 @@
-# MyFPS builds
+# Reading Shootout
 
-Playable builds of MyFPS. Installed copies update themselves from the latest release here.
+Playable builds of Reading Shootout (a first-person shooter set on Catherine Ave, Reading MA). Installed copies update themselves from the latest release here.
 
 ## PC (Windows)
 
-1. Download **[MyFPS-Windows.zip](https://github.com/andyfreed/MyFPS-Releases/releases/latest/download/MyFPS-Windows.zip)** (about 400 MB; always the latest version).
+1. Download **[ReadingShootout-Windows.zip](https://github.com/andyfreed/MyFPS-Releases/releases/latest/download/ReadingShootout-Windows.zip)** (about 400 MB; always the latest version).
 2. Extract it anywhere under your user folder (Documents, Desktop, Downloads). Avoid `C:\Program Files`, the game needs to write to its own folder to update.
 3. Run `MyFPS.exe`. Windows SmartScreen warns once because the build is unsigned: click *More info*, then *Run anyway*.
 
@@ -20,7 +20,7 @@ Open Desktop Mode, open Konsole, paste this and press Enter:
 curl -fsSL https://raw.githubusercontent.com/andyfreed/MyFPS-Releases/main/steamdeck-install.sh | bash
 ```
 
-That downloads the game to `~/Games/MyFPS`, adds **MyFPS** to your Steam library (Non-Steam tab) set to run with Proton, and restarts Steam. Go back to Gaming Mode and launch it. Re-running the command is safe and repairs the install.
+That downloads the game to `~/Games/MyFPS`, adds **Reading Shootout** to your Steam library (Non-Steam tab) set to run with Proton, and restarts Steam. Go back to Gaming Mode and launch it. Re-running the command is safe and repairs the install.
 
 ## Controls
 
