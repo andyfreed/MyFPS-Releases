@@ -35,13 +35,13 @@ mkdir -p "$INSTALL_DIR"
 MANIFEST="$INSTALL_DIR/.manifest.json"
 curl -fsSL "$MANIFEST_URL" -o "$MANIFEST" || die "Could not download $MANIFEST_URL"
 
-VERSION=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["version"])' "$MANIFEST")
+VERSION=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8-sig"))["version"])' "$MANIFEST")
 say "Installing $APP_NAME $VERSION into $INSTALL_DIR"
 
 # path|size|md5|url per line
 python3 - "$MANIFEST" <<'PY' > "$INSTALL_DIR/.files.txt"
 import json, sys
-m = json.load(open(sys.argv[1]))
+m = json.load(open(sys.argv[1], encoding="utf-8-sig"))
 for f in m["files"]:
     p = f["path"].replace("\\", "/")
     if p.startswith("/") or ".." in p:
@@ -108,13 +108,13 @@ echo "=== $(date) pre-launch update check"
 MANIFEST="$INSTALL_DIR/.manifest.json"
 if curl -fsSL --max-time 20 "$MANIFEST_URL" -o "$MANIFEST.new" 2>&1; then
     mv -f "$MANIFEST.new" "$MANIFEST"
-    LATEST=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["version"])' "$MANIFEST" 2>/dev/null)
+    LATEST=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8-sig"))["version"])' "$MANIFEST" 2>/dev/null)
     INSTALLED=$(cat "$INSTALL_DIR/.installed_version" 2>/dev/null)
     if [ -n "$LATEST" ] && [ "$LATEST" != "$INSTALLED" ]; then
         echo "updating $INSTALLED -> $LATEST"
         python3 - "$MANIFEST" <<'PY' > "$INSTALL_DIR/.files.txt"
 import json, sys
-for f in json.load(open(sys.argv[1]))["files"]:
+for f in json.load(open(sys.argv[1], encoding="utf-8-sig"))["files"]:
     p = f["path"].replace("\\", "/")
     if not p.startswith("/") and ".." not in p:
         print(f'{p}|{f["size"]}|{f["md5"].lower()}|{f["url"]}')
