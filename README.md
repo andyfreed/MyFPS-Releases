@@ -22,6 +22,16 @@ curl -fsSL https://raw.githubusercontent.com/andyfreed/MyFPS-Releases/main/steam
 
 That downloads the game to `~/Games/MyFPS`, adds **Reading Shootout** to your Steam library (Non-Steam tab) set to run with Proton, and restarts Steam. Go back to Gaming Mode and launch it. Re-running the command is safe and repairs the install.
 
+## Playing together
+
+One person hosts, everyone else joins with a 4-letter code. Nobody needs an account or port forwarding.
+
+1. Host: main menu, **Host a match**. The status line and the top banner show a code like `KMTV`.
+2. Friends: type the code in the box next to **Join** and press Join. They land in the same map.
+3. Host: when the banner says everyone is connected, press **Enter** (View button on a controller). The ability draft starts for everyone and the match begins.
+
+Everyone must be on the same version; the game updates itself, so just restart if a join finds nothing. On a home network you can also type the host PC address (for example `192.168.1.20`) instead of a code.
+
 ## Controls
 
 | Action | Keyboard / mouse | Controller |
