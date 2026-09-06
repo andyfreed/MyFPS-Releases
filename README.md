@@ -28,8 +28,11 @@ That downloads the game to `~/Games/MyFPS`, adds **MyFPS** to your Steam library
 |---|---|---|
 | Move / look | WASD / mouse | Left stick / right stick |
 | Fire | Left click | RT |
+| Aim (hold) | Right click | LT |
+| Sprint (hold) | Left Shift | L3 |
+| Reload | R | X |
 | Jump | Space | A |
-| Switch weapon | Left Shift | Y |
+| Switch weapon | Mouse wheel | Y |
 | Ability 1 / 2 | Q / E | LB / RB |
 | Pause menu | Esc | Start |
 
