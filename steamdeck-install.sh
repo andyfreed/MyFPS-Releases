@@ -52,7 +52,7 @@ TOTAL=$(wc -l < "$INSTALL_DIR/.files.txt")
 DONE=0
 FETCHED=0
 while IFS='|' read -r path size md5 url; do
-    url=${url%$''}   # tolerate CRLF line endings
+    url=${url%[[:cntrl:]]}   # tolerate CRLF line endings
     DONE=$((DONE + 1))
     dest="$INSTALL_DIR/$path"
     if [ -f "$dest" ] && [ "$(stat -c %s "$dest")" = "$size" ] && [ "$(md5sum "$dest" | cut -c1-32)" = "$md5" ]; then
