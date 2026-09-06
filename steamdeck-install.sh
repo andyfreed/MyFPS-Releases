@@ -69,8 +69,11 @@ done < "$INSTALL_DIR/.files.txt"
 rm -f "$INSTALL_DIR/.files.txt"
 echo "  $FETCHED file(s) downloaded, $((TOTAL - FETCHED)) already up to date."
 
-EXE="$INSTALL_DIR/$APP_NAME.exe"
-[ -f "$EXE" ] || die "Expected $EXE after download"
+# Point Steam at the real game executable, not the launcher at the install root: the launcher only
+# checks for the Visual C++ runtime, which Proton already provides, and its check fails under Proton.
+EXE="$INSTALL_DIR/$APP_NAME/Binaries/Win64/$APP_NAME.exe"
+[ -f "$EXE" ] || EXE="$INSTALL_DIR/$APP_NAME/Binaries/Win64/$APP_NAME-Win64-Shipping.exe"
+[ -f "$EXE" ] || die "Could not find the game executable under $INSTALL_DIR/$APP_NAME/Binaries/Win64"
 
 # ---------------------------------------------------------------- 2. steam shortcut
 say "Adding $APP_NAME to your Steam library (Proton: $PROTON)"

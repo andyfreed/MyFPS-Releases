@@ -4,11 +4,13 @@ Playable builds of MyFPS. Installed copies update themselves from the latest rel
 
 ## PC (Windows)
 
-1. Download the `MyFPS-Windows-vX.Y.Z.zip` from the [first release](https://github.com/andyfreed/MyFPS-Releases/releases/tag/v0.1.0) (later releases only carry changed files).
+1. Open the [latest release](https://github.com/andyfreed/MyFPS-Releases/releases/latest) and download the `MyFPS-Windows-vX.Y.Z.zip` file.
 2. Extract it anywhere under your user folder (Documents, Desktop, Downloads). Avoid `C:\Program Files`, the game needs to write to its own folder to update.
 3. Run `MyFPS.exe`. Windows SmartScreen warns once because the build is unsigned: click *More info*, then *Run anyway*.
 
 It checks for updates every time it starts and applies them automatically.
+
+**"The following component(s) are required: Microsoft Visual C++ Runtime"**: the launcher found the runtime missing. Builds from v0.1.2 on carry the installer and offer to run it. If you have an older zip, install it from Microsoft directly: https://aka.ms/vs/17/release/vc_redist.x64.exe, then start the game again.
 
 ## Steam Deck
 
