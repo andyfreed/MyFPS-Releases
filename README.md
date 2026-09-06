@@ -4,7 +4,7 @@ Playable builds of MyFPS. Installed copies update themselves from the latest rel
 
 ## PC (Windows)
 
-1. Open the [latest release](https://github.com/andyfreed/MyFPS-Releases/releases/latest) and download the `MyFPS-Windows-vX.Y.Z.zip` file.
+1. Download **[MyFPS-Windows.zip](https://github.com/andyfreed/MyFPS-Releases/releases/latest/download/MyFPS-Windows.zip)** (about 400 MB; always the latest version).
 2. Extract it anywhere under your user folder (Documents, Desktop, Downloads). Avoid `C:\Program Files`, the game needs to write to its own folder to update.
 3. Run `MyFPS.exe`. Windows SmartScreen warns once because the build is unsigned: click *More info*, then *Run anyway*.
 
