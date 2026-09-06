@@ -24,4 +24,13 @@ That downloads the game to `~/Games/MyFPS`, adds **MyFPS** to your Steam library
 
 ## Controls
 
-Move with WASD or the left stick, aim with the mouse or right stick, fire with left click or RT. At the start of each match, draft two abilities from the shared pool: first come, first served. Use them with **Q** / **E** on keyboard or **LB** / **RB** on a gamepad.
+| Action | Keyboard / mouse | Controller |
+|---|---|---|
+| Move / look | WASD / mouse | Left stick / right stick |
+| Fire | Left click | RT |
+| Jump | Space | A |
+| Switch weapon | Left Shift | Y |
+| Ability 1 / 2 | Q / E | LB / RB |
+| Pause menu | Esc | Start |
+
+Every binding can be changed in the pause menu under **Controls**. At the start of each match, draft two abilities from the shared pool: first come, first served.
