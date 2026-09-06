@@ -66,14 +66,32 @@ while IFS='|' read -r path size md5 url; do
     mv -f "$dest.part" "$dest"
     FETCHED=$((FETCHED + 1))
 done < "$INSTALL_DIR/.files.txt"
-rm -f "$INSTALL_DIR/.files.txt"
 echo "  $FETCHED file(s) downloaded, $((TOTAL - FETCHED)) already up to date."
+
+# Remove binaries that are no longer part of the game (an old executable next to the new one would be
+# launched by a stale Steam shortcut and crash against the updated content).
+BIN_DIR="$INSTALL_DIR/$APP_NAME/Binaries/Win64"
+if [ -d "$BIN_DIR" ]; then
+    for f in "$BIN_DIR"/*.exe "$BIN_DIR"/*.dll "$BIN_DIR"/*.pdb; do
+        [ -f "$f" ] || continue
+        rel="$APP_NAME/Binaries/Win64/$(basename "$f")"
+        if ! grep -q "^$rel|" "$INSTALL_DIR/.files.txt"; then
+            echo "  removing stale $(basename "$f")"
+            rm -f "$f"
+        fi
+    done
+fi
+rm -f "$INSTALL_DIR/.files.txt"
 
 # Point Steam at the real game executable, not the launcher at the install root: the launcher only
 # checks for the Visual C++ runtime, which Proton already provides, and its check fails under Proton.
-EXE="$INSTALL_DIR/$APP_NAME/Binaries/Win64/$APP_NAME.exe"
-[ -f "$EXE" ] || EXE="$INSTALL_DIR/$APP_NAME/Binaries/Win64/$APP_NAME-Win64-Shipping.exe"
-[ -f "$EXE" ] || die "Could not find the game executable under $INSTALL_DIR/$APP_NAME/Binaries/Win64"
+# Prefer the Shipping executable (what releases ship since v0.1.3), then the Development one.
+EXE=""
+for candidate in "$BIN_DIR/$APP_NAME-Win64-Shipping.exe" "$BIN_DIR/$APP_NAME.exe"; do
+    if [ -f "$candidate" ]; then EXE="$candidate"; break; fi
+done
+[ -n "$EXE" ] || die "Could not find the game executable under $BIN_DIR"
+echo "  Steam will launch: $(basename "$EXE")"
 
 # ---------------------------------------------------------------- 2. steam shortcut
 say "Adding $APP_NAME to your Steam library (Proton: $PROTON)"
