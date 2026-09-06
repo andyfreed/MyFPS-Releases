@@ -93,6 +93,69 @@ done
 [ -n "$EXE" ] || die "Could not find the game executable under $BIN_DIR"
 echo "  Steam will launch: $(basename "$EXE")"
 
+# A native pre-launch updater: Steam runs this script before the game (via Launch Options), so the game
+# files are synced with curl on Linux and the game's own Windows updater never has to swap files under Proton.
+UPDATER="$INSTALL_DIR/deck-update.sh"
+cat > "$UPDATER" <<'UPD'
+#!/usr/bin/env bash
+# Runs before every launch (Steam Launch Options). Syncs the install with the latest release, then starts the game.
+REPO="__REPO__"; APP_NAME="__APP__"; INSTALL_DIR="__DIR__"
+MANIFEST_URL="https://github.com/$REPO/releases/latest/download/manifest.json"
+LOG="$INSTALL_DIR/deck-update.log"
+{
+echo "=== $(date) pre-launch update check"
+MANIFEST="$INSTALL_DIR/.manifest.json"
+if curl -fsSL --max-time 20 "$MANIFEST_URL" -o "$MANIFEST.new" 2>&1; then
+    mv -f "$MANIFEST.new" "$MANIFEST"
+    LATEST=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["version"])' "$MANIFEST" 2>/dev/null)
+    INSTALLED=$(cat "$INSTALL_DIR/.installed_version" 2>/dev/null)
+    if [ -n "$LATEST" ] && [ "$LATEST" != "$INSTALLED" ]; then
+        echo "updating $INSTALLED -> $LATEST"
+        python3 - "$MANIFEST" <<'PY' > "$INSTALL_DIR/.files.txt"
+import json, sys
+for f in json.load(open(sys.argv[1]))["files"]:
+    p = f["path"].replace("\\", "/")
+    if not p.startswith("/") and ".." not in p:
+        print(f'{p}|{f["size"]}|{f["md5"].lower()}|{f["url"]}')
+PY
+        OK=1
+        while IFS='|' read -r path size md5 url; do
+            url=${url%[[:cntrl:]]}
+            dest="$INSTALL_DIR/$path"
+            if [ -f "$dest" ] && [ "$(stat -c %s "$dest")" = "$size" ] && [ "$(md5sum "$dest" | cut -c1-32)" = "$md5" ]; then continue; fi
+            mkdir -p "$(dirname "$dest")"
+            if curl -fL --retry 3 --max-time 900 -s "$url" -o "$dest.part" && [ "$(md5sum "$dest.part" | cut -c1-32)" = "$md5" ]; then
+                mv -f "$dest.part" "$dest"; echo "  updated $path"
+            else
+                echo "  FAILED $path"; rm -f "$dest.part"; OK=0
+            fi
+        done < "$INSTALL_DIR/.files.txt"
+        # binaries the new version no longer ships
+        for f in "$INSTALL_DIR/$APP_NAME/Binaries/Win64"/*.exe "$INSTALL_DIR/$APP_NAME/Binaries/Win64"/*.dll; do
+            [ -f "$f" ] || continue
+            rel="$APP_NAME/Binaries/Win64/$(basename "$f")"
+            grep -q "^$rel|" "$INSTALL_DIR/.files.txt" || { echo "  removing stale $rel"; rm -f "$f"; }
+        done
+        rm -f "$INSTALL_DIR/.files.txt"
+        [ "$OK" = 1 ] && echo "$LATEST" > "$INSTALL_DIR/.installed_version"
+    else
+        echo "up to date ($INSTALLED)"
+    fi
+else
+    echo "offline or GitHub unreachable; launching the installed version"
+fi
+# leftovers of a failed in-game update attempt would only confuse things
+rm -rf "$INSTALL_DIR/UpdateStaging" "$INSTALL_DIR/apply_update.bat"
+} >> "$LOG" 2>&1
+tail -c 200000 "$LOG" > "$LOG.tmp" 2>/dev/null && mv -f "$LOG.tmp" "$LOG"
+exec "$@"
+UPD
+sed -i "s#__REPO__#$REPO#; s#__APP__#$APP_NAME#; s#__DIR__#$INSTALL_DIR#" "$UPDATER"
+chmod +x "$UPDATER"
+echo "$VERSION" > "$INSTALL_DIR/.installed_version"
+LAUNCH_OPTIONS="\"$UPDATER\" %command%"
+echo "  Pre-launch updater installed: $UPDATER"
+
 # ---------------------------------------------------------------- 2. steam shortcut
 say "Adding $APP_NAME to your Steam library (Proton: $PROTON)"
 
@@ -113,10 +176,10 @@ if pgrep -x steam >/dev/null; then
     pgrep -x steam >/dev/null && warn "Steam is still running; the shortcut may not stick. Close Steam fully and re-run if it is missing."
 fi
 
-python3 - "$USER_CFG/shortcuts.vdf" "$STEAM_ROOT/config/config.vdf" "$APP_NAME" "$EXE" "$INSTALL_DIR" "$PROTON" <<'PY'
+python3 - "$USER_CFG/shortcuts.vdf" "$STEAM_ROOT/config/config.vdf" "$APP_NAME" "$EXE" "$INSTALL_DIR" "$PROTON" "$LAUNCH_OPTIONS" <<'PY'
 import os, struct, sys, zlib, shutil, re, time
 
-shortcuts_path, config_path, app_name, exe, start_dir, proton = sys.argv[1:7]
+shortcuts_path, config_path, app_name, exe, start_dir, proton, launch_options = sys.argv[1:8]
 
 # ---- minimal binary VDF (Valve KeyValues) reader/writer ----
 def read_vdf(data):
@@ -188,7 +251,7 @@ entry = {
     "StartDir": dir_q,
     "icon": "",
     "ShortcutPath": "",
-    "LaunchOptions": "",
+    "LaunchOptions": launch_options,
     "IsHidden": 0,
     "AllowDesktopConfig": 1,
     "AllowOverlay": 1,
