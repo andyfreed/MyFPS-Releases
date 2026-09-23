@@ -131,10 +131,11 @@ PY
                 echo "  FAILED $path"; rm -f "$dest.part"; OK=0
             fi
         done < "$INSTALL_DIR/.files.txt"
-        # binaries the new version no longer ships
-        for f in "$INSTALL_DIR/$APP_NAME/Binaries/Win64"/*.exe "$INSTALL_DIR/$APP_NAME/Binaries/Win64"/*.dll; do
+        # binaries and paks the new version no longer ships (content ships as a base pak plus a "_P" patch
+        # pak; a patch left over from an older base would override the new base with old content)
+        for f in "$INSTALL_DIR/$APP_NAME/Binaries/Win64"/*.exe "$INSTALL_DIR/$APP_NAME/Binaries/Win64"/*.dll                  "$INSTALL_DIR/$APP_NAME/Content/Paks"/*.pak "$INSTALL_DIR/$APP_NAME/Content/Paks"/*.ucas                  "$INSTALL_DIR/$APP_NAME/Content/Paks"/*.utoc "$INSTALL_DIR/$APP_NAME/Content/Paks"/*.sig; do
             [ -f "$f" ] || continue
-            rel="$APP_NAME/Binaries/Win64/$(basename "$f")"
+            rel="${f#"$INSTALL_DIR/"}"
             grep -q "^$rel|" "$INSTALL_DIR/.files.txt" || { echo "  removing stale $rel"; rm -f "$f"; }
         done
         rm -f "$INSTALL_DIR/.files.txt"
